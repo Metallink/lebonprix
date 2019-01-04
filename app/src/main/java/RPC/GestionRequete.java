@@ -6,6 +6,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -21,9 +22,11 @@ public class GestionRequete extends AsyncTask<URL, Integer, JSONObject> {
     private volatile MainActivity monActivitePrincipale;
     private URL monURL;
     private RequestQueue queue = Volley.newRequestQueue(monActivitePrincipale);
-    private StringRequest stringRequest;
-    Listener<String> unListener;
-    ErrorListener unErrorListener;
+    //private StringRequest stringRequest;
+    private JsonObjectRequest request;
+
+    private Listener<String> listenerOK;
+    private ErrorListener listenerErreur;
 
     // CONSTRUCTEUR
     public GestionRequete(MainActivity a) {
@@ -44,12 +47,12 @@ public class GestionRequete extends AsyncTask<URL, Integer, JSONObject> {
 
         //////////////////////////////////////////
         // Request a string response from the provided URL.
-        this.stringRequest = new StringRequest(Request.Method.GET, url, unListener, unErrorListener);
+        //this.request = new JsonObjectRequest(Request.Method.GET, url, listenerOK, listenerErreur);
 
     }
 
     protected JSONObject doInBackground(URL... urls) {
-        queue.add(stringRequest);
+        queue.add(request);
         return null;
     }
 
@@ -60,6 +63,8 @@ public class GestionRequete extends AsyncTask<URL, Integer, JSONObject> {
 
 }
 
+
+// https://abhiandroid.com/programming/volley
 
 // https://blog.webwag.com/2017/02/14/introduction-a-volley-gson/
 

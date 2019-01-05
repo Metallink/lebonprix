@@ -1,10 +1,12 @@
 package info.lebonprix;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.SparseIntArray;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -25,14 +27,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class MainActivity extends AppCompatActivity {
 
     /* ======================= UI ELEMENTS ======================= */
     private EditText m_champs_recherche;
-    private Button m_bouton;
+    private Button m_button_search;
     private TextView m_prix;
+    private Button m_button_details;
 
     /* ======================= ATTRIBUTS ======================= */
     private static String firstURL = "https://www.lebonprix.info/api/categorizer?q=";
@@ -40,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
     //private ArrayList<String> m_arrayCategory;
     private CharSequence[] chars;
     private String m_selected_category;
+    private SparseIntArray m_hash_map = new SparseIntArray();
+    private HashMap<Integer,Integer> m_hm = new HashMap<Integer,Integer>();
 
     /* ======================= GETTER/SETTER ======================= */
     public EditText get_champs_recherche() {
@@ -51,11 +57,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public Button get_bouton() {
-        return m_bouton;
+        return m_button_search;
     }
 
-    public void set_bouton(Button m_bouton) {
-        this.m_bouton = m_bouton;
+    public void set_bouton(Button m_button_search) {
+        this.m_button_search = m_button_search;
     }
 
     public TextView get_prix() {
@@ -74,11 +80,12 @@ public class MainActivity extends AppCompatActivity {
 
         // Bindings
         m_champs_recherche = findViewById(R.id.champs_texte);
-        m_bouton = findViewById(R.id.bouton_estimer);
+        m_button_search = findViewById(R.id.bouton_estimer);
         m_prix = findViewById(R.id.prix);
+        m_button_details = findViewById(R.id.bouton_details);
 
-        // On click()
-        m_bouton.setOnClickListener(new OnClickListener() {
+        // On click() search button
+        m_button_search.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (m_champs_recherche.length() == 0)
@@ -86,6 +93,17 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     sendFirstRequest(m_champs_recherche.getText().toString());
                 }
+            }
+        });
+
+        // On click() details button
+        m_button_details.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent detailsIntent = new Intent(MainActivity.this, GraphActivity.class);
+                detailsIntent.putExtra("hmGraph", m_hm);
+                startActivity(detailsIntent);
+
             }
         });
     }
@@ -101,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
 
         final ArrayList<String> m_arrayCategory = new ArrayList<>();
         final AlertDialog.Builder builderSingle = new AlertDialog.Builder(MainActivity.this);
+        builderSingle.setTitle("Choisissez une catégorie");
 
         // building the url
         firstURL += keyword;
@@ -151,27 +170,57 @@ public class MainActivity extends AppCompatActivity {
         // setting the url
         m_fullURL = "https://www.lebonprix.info/api/sampling?q=" + keyword + "&c=" + category;
 
+        //final Map<Integer,Integer> hm = new HashMap<>();
+        // like HashMap but better as it is more efficient
+        //final SparseIntArray hm = new SparseIntArray();
+
         final ArrayList<Integer> listPrices = new ArrayList<>();
 
         //RequestQueue initialized
-        RequestQueue m_request = Volley.newRequestQueue(this);
+        final RequestQueue m_request = Volley.newRequestQueue(this);
         //String Request initialized
-        JsonObjectRequest m_JSONRequest = new JsonObjectRequest(Request.Method.GET, m_fullURL, null, new Response.Listener<JSONObject>() {
+        final JsonObjectRequest m_JSONRequest = new JsonObjectRequest(Request.Method.GET, m_fullURL, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 try {
                     JSONArray sample = response.getJSONArray("sample");
+                    //System.out.println("???????????????????????????? " + sample);
                     for (int i = 0; i < sample.length(); i++) {
                         listPrices.add(sample.getInt(i));
+                        if (m_hash_map.indexOfKey(sample.getInt(i)) < 0) {
+                            //System.out.println("============== JE N'EXISTE PAS ENCORE ==============");
+                            m_hash_map.append(sample.getInt(i), 1);
+                            //System.out.println("CLE: " + sample.getInt(i) + " VALEUR " + hm.get(sample.getInt(i)));
+                        } else {
+                            //System.out.println("++++++++ J'EXISTE ++++++++");
+                            m_hash_map.append(sample.getInt(i), m_hash_map.get(sample.getInt(i))+1);
+                            //System.out.println("CLE: " + sample.getInt(i) +  " VALEUR: " + hm.get(sample.getInt(i)));
+                        }
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
 
+                //List<Integer> l = new ArrayList<>();
+                ///Collections.sort(l);
+
+                for (int j = 0; j < m_hash_map.size(); j++) {
+                    //System.out.println("Clé: " + keyList.get(j) + " Valeur: " + hm.get(keyList.get(j)));
+                    //System.out.println("Clé: " + m_hash_map.keyAt(j) + " Valeur: " + m_hash_map.get(m_hash_map.keyAt(j)));
+                    m_hm.put(m_hash_map.keyAt(j), m_hash_map.get(m_hash_map.keyAt(j)));
+                }
+
+
+
+                // displaying the price
                 int somme = calculateAverage(listPrices);
                 String prix = somme + "€";
                 m_prix.setText(prix);
                 m_prix.setVisibility(View.VISIBLE);
+
+                // display the details button
+                m_button_details.setVisibility(View.VISIBLE);
+
             }
         }, new Response.ErrorListener() {
             @Override
@@ -198,10 +247,13 @@ public class MainActivity extends AppCompatActivity {
 }
 
 
+// TODO Voir le design en mode portrait
+// TODO Ajouter toutes les catégories
 // TODO Gerer les espaces et symboles dans les URLs
 // TODO optimisation des request queue avec les TAGs
 // TODO Fermer le clavier une fois qu'on a cliqué sur le bouton "Estimer"
 // TODO Enlever la Barre du haut "leBonPrix"
+// TODO Vérifier le manifest
 // https://www.androidhive.info/2014/09/android-json-parsing-using-volley/
 
 

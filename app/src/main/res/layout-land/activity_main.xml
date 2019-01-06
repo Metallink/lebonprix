@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/logo"
+        android:layout_width="wrap_content"
+        android:layout_height="94dp"
+        android:src="@drawable/logo" />
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/champs_texte"
+            android:layout_width="440dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:hint="Que voulez-vous estimer ?"
+            android:inputType="text"
+            android:textAlignment="viewStart"
+            app:layout_constraintEnd_toStartOf="@+id/bouton_estimer"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="HardcodedText"
+            tools:layout_conversion_absoluteHeight="46dp"
+            tools:layout_conversion_absoluteWidth="217dp" />
+
+        <Button
+            android:id="@+id/bouton_estimer"
+            android:layout_width="112dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:background="@android:color/holo_orange_dark"
+            android:text="ESTIMER"
+            android:textColor="@android:color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/champs_texte"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="HardcodedText"
+            tools:layout_conversion_absoluteHeight="48dp"
+            tools:layout_conversion_absoluteWidth="88dp" />
+    </android.support.constraint.ConstraintLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:baselineAligned="false"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/prix"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:layout_gravity="top"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:textColor="@android:color/holo_orange_dark"
+            android:textSize="60sp"
+            android:visibility="invisible"
+            tools:visibility="visible"
+            tools:text="30" />
+
+        <Button
+
+            android:id="@+id/bouton_details"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="20dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@android:color/holo_orange_dark"
+            android:text="Détails sur le prix"
+            android:textColor="@android:color/white"
+            android:visibility="invisible"
+            tools:visibility="visible"
+            tools:ignore="HardcodedText" />
+    </RelativeLayout>
+
+</LinearLayout>

@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".MainActivity">
 
     <android.support.v7.widget.AppCompatImageView
         android:id="@+id/logo"
@@ -15,51 +14,62 @@
         android:src="@drawable/logo" />
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_gravity="center_horizontal">
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal">
 
         <EditText
             android:id="@+id/champs_texte"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:inputType="text"
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="20dp"
             android:hint="Que voulez-vous estimer ?"
-            tools:ignore="HardcodedText"
-            android:layout_marginEnd="15dp"
-            />
+            android:inputType="text"
+            tools:ignore="HardcodedText" />
 
         <Button
             android:id="@+id/bouton_estimer"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/holo_orange_dark"
-            android:textColor="@android:color/white"
+            android:layout_marginEnd="20dp"
+            android:background="@drawable/btn_rounded"
             android:text="ESTIMER"
+            android:textColor="@android:color/white"
             tools:ignore="HardcodedText" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/prix"
-        android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:textColor="@android:color/holo_orange_dark"
+        android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:textSize="90sp"
-        android:layout_marginTop="20dp"
+        android:layout_marginBottom="30dp"
+        android:layout_marginTop="30dp"
+        android:textColor="@android:color/holo_orange_dark"
+        android:textSize="100sp"
         android:visibility="invisible" />
 
-    <Button
-        android:id="@+id/bouton_details"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:background="@android:color/holo_orange_dark"
-        android:textColor="@android:color/white"
-        android:paddingLeft="5dp"
-        android:paddingRight="5dp"
-        android:text="Détails sur le prix"
-        android:visibility="invisible"
-        tools:ignore="HardcodedText" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:baselineAligned="false"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/bouton_details"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="30dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:background="@drawable/btn_rounded"
+            android:text="@string/d_tails_sur_le_prix"
+            android:textColor="@android:color/white"
+            android:visibility="invisible" />
+    </LinearLayout>
+
 </LinearLayout>

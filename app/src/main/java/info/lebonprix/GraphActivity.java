@@ -1,14 +1,17 @@
 package info.lebonprix;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.ValueDependentColor;
-import com.jjoe64.graphview.series.BarGraphSeries;
-import com.jjoe64.graphview.series.DataPoint;
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.XAxis.XAxisPosition;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,8 +19,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+//import com.jjoe64.graphview.GraphView;
+//import com.jjoe64.graphview.ValueDependentColor;
+//import com.jjoe64.graphview.series.BarGraphSeries;
+//import com.jjoe64.graphview.series.DataPoint;
+
 public class GraphActivity extends AppCompatActivity {
 
+    @SuppressLint("UseSparseArrays")
     private Map<Integer, Integer> hm = new HashMap<>();
     private List<Integer> l;
 
@@ -31,29 +40,37 @@ public class GraphActivity extends AppCompatActivity {
         Bundle b = ii.getExtras();
 
         if (b != null)
-            hm = (HashMap<Integer, Integer>) b.get("hmGraph");
+            hm = (HashMap<Integer,Integer>)b.get("hmGraph");
 
         if (hm != null)
-            l = new ArrayList<Integer>(hm.keySet());
+            l = new ArrayList<>(hm.keySet());
 
         Collections.sort(l);
 
-        GraphView graph = (GraphView) findViewById(R.id.graph);
+        BarChart chart = findViewById(R.id.chart);
+        List<BarEntry> entries = new ArrayList<>();
+
+        for (int i = 0; i < hm.size(); i++) {
+
+            // turn your data into Entry objects
+            entries.add(new BarEntry(l.get(i), hm.get(l.get(i))));
+        }
+
+        BarDataSet dataSet = new BarDataSet(entries, "Label");
+        BarData lineData = new BarData(dataSet);
+        chart.setData(lineData);
+        // styling
+        chart.setNoDataText("Erreur d'affichage du graphique");
+        chart.setDrawBorders(false);
+        XAxis xAxis = chart.getXAxis();
+        xAxis.setPosition(XAxisPosition.BOTTOM);
+        xAxis.setTextSize(10f);
+        xAxis.setTextColor(Color.RED);
+        chart.invalidate(); // refresh
+
+        /*GraphView graph = (GraphView) findViewById(R.id.graph);
 
         DataPoint[] dp = calcul();
-        /*BarGraphSeries<DataPoint> series = new BarGraphSeries<>(new DataPoint[]{
-                new DataPoint(0, 12),
-                new DataPoint(1, 5),
-                new DataPoint(2, 3),
-                new DataPoint(3, 2),
-                new DataPoint(4, 6),
-                new DataPoint(5, 10),
-                new DataPoint(8, 7),
-                new DataPoint(9, 2),
-                new DataPoint(10, 3),
-                new DataPoint(13, 4)
-        });*/
-
         BarGraphSeries<DataPoint> series = new BarGraphSeries<>(dp);
         graph.addSeries(series);
 
@@ -69,15 +86,15 @@ public class GraphActivity extends AppCompatActivity {
 
         // draw values on top
         series.setDrawValuesOnTop(true);
-        series.setValuesOnTopColor(Color.RED);
+        series.setValuesOnTopColor(Color.RED);*/
     }
 
-    DataPoint[] calcul() {
+   /* DataPoint[] calcul() {
 
         DataPoint[] dp = new DataPoint[hm.size()];
         for (int i = 0; i < hm.size(); i++) {
             dp[i] = new DataPoint(l.get(i), hm.get(l.get(i)));
         }
         return dp;
-    }
+    }*/
 }

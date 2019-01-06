@@ -7,33 +7,43 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity"
     android:orientation="vertical">
-
-
-    <TextView
-        android:id="@+id/textView"
+    
+    <com.github.mikephil.charting.charts.BarChart
+        android:id="@+id/chart"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/pourquoi_ce_prix"
-        android:textAlignment="center"
-        android:textSize="30sp" />
-
-    <TextView
-        android:id="@+id/textView2"
+        android:layout_weight="50"/>
+    
+    <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/l_estimation_du_prix_moyen_est_bas_sur_un_chantillon_statistiquement_repr_sentatif_au_niveau_national_et_extrait_en_temps_r_el_du_site_leboncoin_fr_par_cons_quent_le_moment_et_la_fa_on_dont_vous_formulez_votre_recherche_ont_une_influence_directe_sur_le_r_sultat"
-        android:textAlignment="center" />
+        android:text="Pourquoi ce prix ?"
+        android:background="@drawable/btn_rounded"
+        android:visibility="visible"
 
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/graphique_des_prix"
-        android:textAlignment="center"
-        android:textSize="30sp" />
-
-    <com.jjoe64.graphview.GraphView
-        android:layout_width="match_parent"
-        android:layout_height="250dip"
-        android:id="@+id/graph" />
+        android:layout_weight="1"
+        tools:ignore="HardcodedText" />
 </LinearLayout>
+
+<!--<TextView
+android:id="@+id/textView"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:text="@string/pourquoi_ce_prix"
+android:textAlignment="center"
+android:textSize="30sp" />
+
+<TextView
+android:id="@+id/textView2"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:text="@string/l_estimation_du_prix_moyen_est_bas_sur_un_chantillon_statistiquement_repr_sentatif_au_niveau_national_et_extrait_en_temps_r_el_du_site_leboncoin_fr_par_cons_quent_le_moment_et_la_fa_on_dont_vous_formulez_votre_recherche_ont_une_influence_directe_sur_le_r_sultat"
+android:textAlignment="center" />
+
+<TextView
+android:id="@+id/textView3"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:text="@string/graphique_des_prix"
+android:textAlignment="center"
+android:textSize="30sp" />-->

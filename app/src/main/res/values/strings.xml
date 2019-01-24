@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">LeBonPrix</string>
+    <string name="app_name">Lebonprix</string>
     <string name="pourquoi_ce_prix">Pourquoi ce prix ?</string>
     <string name="l_estimation_du_prix_moyen_est_bas_sur_un_chantillon_statistiquement_repr_sentatif_au_niveau_national_et_extrait_en_temps_r_el_du_site_leboncoin_fr_par_cons_quent_le_moment_et_la_fa_on_dont_vous_formulez_votre_recherche_ont_une_influence_directe_sur_le_r_sultat">L\'estimation du prix moyen est basé sur un échantillon statistiquement représentatif au niveau national, et extrait en temps réel du site leboncoin.fr. Par conséquent, le moment et la façon dont vous formulez votre recherche ont une influence directe sur le résultat.</string>
     <string name="graphique_des_prix">Graphique des prix</string>

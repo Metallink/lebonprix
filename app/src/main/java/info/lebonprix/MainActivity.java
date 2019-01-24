@@ -1,7 +1,6 @@
 package info.lebonprix;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -45,49 +44,23 @@ public class MainActivity extends AppCompatActivity {
 
     /* ======================= UI ELEMENTS ======================= */
     private EditText m_champs_recherche;
-    private Button m_button_search;
     private TextView m_prix;
     private Button m_button_details;
 
     /* ======================= ATTRIBUTS ======================= */
     private static String firstURL = "https://www.lebonprix.info/api/categorizer?q=";
-    //private static String m_fullURL = "https://www.lebonprix.info/api/sampling?q=";
 
-    //private ArrayList<String> m_arrayCategory;
     private String m_selected_category;
     private CharSequence[] chars;
     private SparseIntArray m_hash_map = new SparseIntArray();
     @SuppressLint("UseSparseArrays")
     private HashMap<Integer, Integer> m_hm = new HashMap<>();
-    RequestQueue m_request = null;
+    private RequestQueue m_request = null;
+    int m_somme = 0;
+    int m_sample = 0; // samples
 
-    private long mLastClickTime = 0; // avoid multiple clicks
-
-
-    /* ======================= GETTER/SETTER ======================= */
-    public EditText get_champs_recherche() {
-        return m_champs_recherche;
-    }
-
-    public void set_champs_recherche(EditText m_champs_recherche) {
-        this.m_champs_recherche = m_champs_recherche;
-    }
-
-    public Button get_bouton() {
-        return m_button_search;
-    }
-
-    public void set_bouton(Button m_button_search) {
-        this.m_button_search = m_button_search;
-    }
-
-    public TextView get_prix() {
-        return m_prix;
-    }
-
-    public void set_prix(TextView m_prix) {
-        this.m_prix = m_prix;
-    }
+    // avoid multiple clicks
+    private long mLastClickTime = 0;
 
     /* ======================= ONCREATE() ======================= */
     @Override
@@ -97,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Bindings
         m_champs_recherche = findViewById(R.id.champs_texte);
-        m_button_search = findViewById(R.id.bouton_estimer);
+        Button m_button_search = findViewById(R.id.bouton_estimer);
         m_prix = findViewById(R.id.prix);
         m_button_details = findViewById(R.id.bouton_details);
 
@@ -130,14 +103,29 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
                 mLastClickTime = SystemClock.elapsedRealtime();
-                Intent detailsIntent = new Intent(MainActivity.this, GraphActivity.class);
-                detailsIntent.putExtra("hmGraph", m_hm);
-                startActivity(detailsIntent);
+
+                // if the price is null, we won't go into the graphActivity
+                if (m_somme == 0) {
+                    Toast.makeText(getApplicationContext(), "Pas de résultat à afficher", Toast.LENGTH_LONG).show();
+                } else {
+                    // go to the second activity
+                    Intent detailsIntent = new Intent(MainActivity.this, GraphActivity.class);
+                    detailsIntent.putExtra("hmGraph", m_hm);
+                    detailsIntent.putExtra("samples", m_sample);
+                    detailsIntent.putExtra("product", m_champs_recherche.getText().toString());
+                    startActivity(detailsIntent);
+                }
             }
         });
     }
 
-    /* ======================= FUNCTIONS ======================= */
+    /**
+     * This method is used to prepare the URL, sending the http request using the Volley libraby
+     * and in a second time, treating the http response by collecting the different categories sent
+     * by the server. It also displays the categories to the users.
+     *
+     * @param keyword String containing the name of the product that the user is searching
+     */
     private void sendFirstRequest(final String keyword) {
 
         final ArrayList<String> m_arrayCategory = new ArrayList<>();
@@ -147,8 +135,9 @@ public class MainActivity extends AppCompatActivity {
         builderSingle.setTitle("Choisissez une catégorie");
 
         // building the url
-        firstURL += keyword;
-
+        String keyword_parsed = keyword;
+        keyword_parsed = keyword_parsed.replaceAll(" ", "%20");
+        firstURL += keyword_parsed;
 
         if (m_request == null)
             m_request = Volley.newRequestQueue(this);
@@ -166,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 // convert our ArrayList to a CharSequence[], (needed by the setItems())
-                chars = m_arrayCategory.toArray(new CharSequence[m_arrayCategory.size()]);
+                chars = m_arrayCategory.toArray(new CharSequence[0]);
                 builderSingle.setItems(chars, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         if (which != 0) {
@@ -190,25 +179,33 @@ public class MainActivity extends AppCompatActivity {
                 // Finally, display the alert dialog
                 dialog.show();
 
-                // display the dialog ui
-                //builderSingle.show();
-
-                // default URL
+                // setting back the default URL
                 firstURL = "https://www.lebonprix.info/api/categorizer?q=";
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-
                 Log.i(MainActivity.class.getName(), "Error :" + error.toString());
             }
         });
-
         // send the request
         m_request.add(m_JSONRequest);
     }
 
+    /**
+     * This method is taking care of the second request which is sending the http request to the server using
+     * the Volley library.
+     * <p>
+     * First, it is preparing, building, parsing the URL and sending the http request.
+     * Secondly, it is listening for the http response containing the values. It puts the data
+     * into an hash map and calculating the average price of the searched product.
+     *
+     * @param keyword  String containing the name of the product that the user is searching
+     * @param category String containing the category that has been selected by the user
+     */
     private void sendSecondRequest(String keyword, String category) {
+        // empty hash maps;
+        m_hash_map.clear();
 
         // setting the URL
         Uri.Builder ub = new Builder();
@@ -216,62 +213,65 @@ public class MainActivity extends AppCompatActivity {
                 .authority("www.lebonprix.info")
                 .path("api/sampling")
                 .appendQueryParameter("q", keyword)
-                .appendQueryParameter("c", category)
+                //.appendQueryParameter("c", category)
                 .build();
 
-        String fullURL = ub.toString();
-        System.out.println("YOLOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO ================ " + fullURL);
+        // adding the category using the method parseCategory()
+        String fullURL = ub.toString().concat("&c=" + parseCategory(category));
 
         //final Map<Integer,Integer> hm = new HashMap<>();
         // like HashMap but better as it is more efficient
         //final SparseIntArray hm = new SparseIntArray();
 
+        // temporary list that will contain the prices (the real list is the hash map)
         final ArrayList<Integer> listPrices = new ArrayList<>();
 
         //RequestQueue initialized
         final RequestQueue m_request = Volley.newRequestQueue(this);
         //String Request initialized
         final JsonObjectRequest m_JSONRequest = new JsonObjectRequest(Request.Method.GET, fullURL, null, new Response.Listener<JSONObject>() {
+            @SuppressLint("SetTextI18n")
             @Override
             public void onResponse(JSONObject response) {
                 try {
                     JSONArray sample = response.getJSONArray("sample");
-                    //System.out.println("???????????????????????????? " + sample);
                     for (int i = 0; i < sample.length(); i++) {
+                        // adding the price to the list
                         listPrices.add(sample.getInt(i));
+                        // if price doesn't exist
                         if (m_hash_map.indexOfKey(sample.getInt(i)) < 0) {
-                            //System.out.println("============== JE N'EXISTE PAS ENCORE ==============");
+                            // we add it and init its number of occurences  to 1
                             m_hash_map.append(sample.getInt(i), 1);
-                            //System.out.println("CLE: " + sample.getInt(i) + " VALEUR " + hm.get(sample.getInt(i)));
                         } else {
-                            //System.out.println("++++++++ J'EXISTE ++++++++");
+                            // the price already exist in the hash map so we simply inc its number of occurences
                             m_hash_map.append(sample.getInt(i), m_hash_map.get(sample.getInt(i)) + 1);
-                            //System.out.println("CLE: " + sample.getInt(i) +  " VALEUR: " + hm.get(sample.getInt(i)));
                         }
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
 
-                //List<Integer> l = new ArrayList<>();
-                ///Collections.sort(l);
+                // empty the previous hm
+                m_hm.clear();
 
                 for (int j = 0; j < m_hash_map.size(); j++) {
-                    //System.out.println("Clé: " + keyList.get(j) + " Valeur: " + hm.get(keyList.get(j)));
-                    //System.out.println("Clé: " + m_hash_map.keyAt(j) + " Valeur: " + m_hash_map.get(m_hash_map.keyAt(j)));
                     m_hm.put(m_hash_map.keyAt(j), m_hash_map.get(m_hash_map.keyAt(j)));
                 }
 
-
                 // displaying the price
-                int somme = calculateAverage(listPrices);
-                String prix = somme + "€";
-                m_prix.setText(prix);
-                m_prix.setVisibility(View.VISIBLE);
+                m_somme = calculateAverage(listPrices);
+
+                if (m_somme == 0) {
+                    m_prix.setText("Inconnu");
+                    m_prix.setVisibility(View.VISIBLE);
+                } else {
+                    String prix = m_somme + "€";
+                    m_prix.setText(prix);
+                    m_prix.setVisibility(View.VISIBLE);
+                }
 
                 // display the details button
                 m_button_details.setVisibility(View.VISIBLE);
-
             }
         }, new Response.ErrorListener() {
             @Override
@@ -279,36 +279,48 @@ public class MainActivity extends AppCompatActivity {
                 Log.i(MainActivity.class.getName(), "Error :" + error.toString());
             }
         });
-
         // send the request
         m_request.add(m_JSONRequest);
     }
 
-    int calculateAverage(ArrayList<Integer> list) {
+    /**
+     * This method is an utility method that is being used to calculated the average price
+     * given a list containing prices of the searched product.
+     *
+     * @param uneListe an array containing different prices for the product
+     * @return the average price of the product
+     */
+    int calculateAverage(ArrayList<Integer> uneListe) {
         double sum = 0.0;
 
-        if (!list.isEmpty()) {
-            for (Integer price : list) {
+        if (!uneListe.isEmpty()) {
+            for (Integer price : uneListe) {
                 sum += price;
             }
-            return (int) Math.ceil(sum / list.size());
+            m_sample = uneListe.size();
+            return (int) Math.ceil(sum / uneListe.size());
         }
         return (int) sum;
     }
+
+    /**
+     * This method is an utility method that is used to prepare the category for the second request's
+     * URL. The URL must be cleaned from spaces, different accents...
+     *
+     * @param cat the category that we want to parse
+     * @return the category parsed (withtout accents and spaces)
+     */
+    String parseCategory(String cat) {
+
+        String s = cat.trim();
+        s = s.replaceAll("[éèêë]", "e");
+        s = s.replaceAll("[îï]", "i");
+        s = s.replaceAll("[ôö]", "o");
+        s = s.replaceAll("'", "_");
+        s = s.replaceAll(" & ", "_");
+        s = s.replaceAll(" - ", "_");
+        s = s.replaceAll(" ", "_");
+
+        return s;
+    }
 }
-
-
-// TODO Gerer les espaces et symboles dans les URLs
-// TODO Vérifier le manifest
-
-// ========================================================== DONE
-// TODO Fermer le clavier une fois qu'on a cliqué sur le bouton "Estimer"
-// TODO Supprimer la barre du haut
-// TODO Ajouter toutes les catégories
-// TODO eviter le double click
-
-
-// https://www.androidhive.info/2014/09/android-json-parsing-using-volley/
-
-// https://www.lebonprix.info/api/categorizer?q=red%20dead%20redemption%202
-// https://www.lebonprix.info/api/sampling?q=red%20dead%20redemption%202&c=consoles_jeux_video
